@@ -62,7 +62,9 @@ def ingest(
     now = utc_now()
     if retrieved > now:
         raise ValueError("retrieved_at gelecekte olamaz")
-    scan_for_secrets(data)
+    content_type = infer_content_type(file_name, kind)
+    if content_type.startswith("text/"):
+        scan_for_secrets(data)
     raw_hash = sha256_bytes(data)
     existing = connection.execute(
         "SELECT * FROM source WHERE raw_hash=?", (raw_hash,)
@@ -73,7 +75,6 @@ def ingest(
             f"Bu içerik zaten {existing['id']} olarak kayıtlı (ilk gözlem: {existing['retrieved_at']})",
         )
     source_id = next_id(connection, "source")
-    content_type = infer_content_type(file_name, kind)
     ingested_at = isoformat_utc(now)
     meta = {
         "source_id": source_id, "source_family": source_family, "kind": kind,
