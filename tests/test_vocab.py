@@ -1,6 +1,6 @@
 import pytest
 
-from src.vocab import CLAIM_TYPES, PLATFORM_REPORTED_COUNT, require_claim_type
+from src.vocab import CLAIM_TYPES, PLATFORM_REPORTED_COUNT, require_claim_type, unit_is_valid
 
 
 def test_t06_unknown_claim_type_is_rejected_with_valid_types():
@@ -14,5 +14,11 @@ def test_platform_reported_count_semantics_are_exactly_the_frozen_five():
     marked = {name for name, spec in CLAIM_TYPES.items() if spec.semantics == PLATFORM_REPORTED_COUNT}
     assert marked == {
         "AMZ_SEARCH_RESULT_COUNT", "ETSY_LISTING_COUNT", "YT_RESULT_COUNT",
-        "GB_TITLE_COUNT", "OL_SUBJECT_WORK_COUNT",
+        "GB_TITLE_COUNT", "OL_SUBJECT_WORK_COUNT", "ETSY_REVIEW_COUNT",
     }
+
+
+def test_etsy_price_keeps_observed_currency_without_conversion():
+    spec=CLAIM_TYPES["ETSY_PRICE"]
+    assert unit_is_valid(spec,"TRY") and unit_is_valid(spec,"USD")
+    assert not unit_is_valid(spec,"TL")

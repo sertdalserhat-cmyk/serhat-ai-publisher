@@ -9,7 +9,7 @@ from pathlib import Path
 from .config import EVIDENCE_DIR, isoformat_utc, utc_now
 from .ids import next_id
 from .snapshot import verify_snapshots
-from .vocab import CONFIDENCE_BY_RELIABILITY, require_claim_type
+from .vocab import CONFIDENCE_BY_RELIABILITY, require_claim_type, unit_is_valid
 
 
 @dataclass(frozen=True)
@@ -66,7 +66,7 @@ def add_claim(
     if spec.value_kind == "num":
         if value_num is None or unit is None:
             raise ValueError("CB-2: sayısal iddia için value_num ve unit zorunludur")
-        if unit != spec.unit:
+        if not unit_is_valid(spec, unit):
             raise ValueError(f"CB-2: unit {spec.unit!r} olmalıdır")
     elif value_text is None:
         raise ValueError("Metinsel iddia için value_text zorunludur")

@@ -11,7 +11,7 @@ PLATFORM_REPORTED_COUNT = "PLATFORM_REPORTED_COUNT"
 class ClaimType:
     family: str
     value_kind: str
-    unit: str | None
+    unit: str | tuple[str, ...] | None
     ttl_days: int
     semantics: str = DIRECT_OBSERVATION
 
@@ -53,7 +53,9 @@ CLAIM_TYPES = {
     "AMZ_AUTOCOMPLETE_SUGGESTION": _c("AMAZON_KDP", "text", None, 30),
     "AMZ_REVIEW_TEXT": _c("AMAZON_KDP", "text", None, 180),
     "ETSY_LISTING_COUNT": _c("ETSY", "num", "count", 7, PLATFORM_REPORTED_COUNT),
-    "ETSY_PRICE": _c("ETSY", "num", "USD", 7),
+    "ETSY_PRICE": _c("ETSY", "num", ("USD", "TRY", "EUR", "GBP", "CAD", "AUD"), 7),
+    "ETSY_REVIEW_COUNT": _c("ETSY", "num", "count", 30, PLATFORM_REPORTED_COUNT),
+    "ETSY_REVIEW_RATING": _c("ETSY", "num", "stars", 30),
     "ETSY_SHOP_SALES": _c("ETSY", "num", "count", 14),
     "ETSY_FAVORITES": _c("ETSY", "num", "count", 14),
     "ETSY_IS_PERSONALIZABLE": _c("ETSY", "text", None, 90),
@@ -97,3 +99,9 @@ def require_source_family(name: str) -> tuple[str, str]:
         return SOURCE_FAMILIES[name]
     except KeyError as exc:
         raise ValueError(f"Geçersiz source_family: {name}") from exc
+
+
+def unit_is_valid(spec: ClaimType, unit: str | None) -> bool:
+    if isinstance(spec.unit, tuple):
+        return unit in spec.unit
+    return unit == spec.unit
