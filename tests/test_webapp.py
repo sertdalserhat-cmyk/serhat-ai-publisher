@@ -2,6 +2,7 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 import threading
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 
 from src.db import initialize
 from src.opportunity import create_opportunity
@@ -25,10 +26,22 @@ def test_dashboard_routes_and_human_decision(tmp_path: Path):
     try:
         home = urlopen(base + "/", timeout=2).read().decode("utf-8")
         review = urlopen(base + "/review", timeout=2).read().decode("utf-8")
+        blueprint = urlopen(base + "/blueprint", timeout=2).read().decode("utf-8")
+        try:
+            urlopen(
+                Request(
+                    base + "/decision",
+                    data=b"status=APPROVED&rationale=Accidental+click",
+                    method="POST",
+                ), timeout=2,
+            )
+            assert False, "Açık onaysız karar reddedilmeliydi"
+        except HTTPError as exc:
+            assert exc.code == 400
         decision = urlopen(
             Request(
                 base + "/decision",
-                data=b"status=PARKED&rationale=More+evidence+needed",
+                data=b"status=PARKED&rationale=More+evidence+needed&confirm=YES",
                 method="POST",
             ),
             timeout=2,
@@ -41,6 +54,8 @@ def test_dashboard_routes_and_human_decision(tmp_path: Path):
     assert "BAŞLAT" in home
     assert "Nursery test" in review
     assert "İNSAN KARAR KAPISI" in review
+    assert "PRODUCT BLUEPRINT" in blueprint
+    assert "KİLİTLİ" in blueprint
     assert "Karar kaydedildi" in decision
 
     conn = initialize(db_path)
