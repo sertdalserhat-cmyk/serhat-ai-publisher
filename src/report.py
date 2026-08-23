@@ -18,8 +18,9 @@ def generate_report(connection, *, opportunity_id, out_path, fresh=False, now=No
     items = []
     for row in rows:
         value = row["value_num"] if row["value_num"] is not None else row["value_text"]
+        rendered_value = f"{value} {row['unit']}" if row["value_num"] is not None and row["unit"] else str(value)
         note = " <em>(platformun bildirdiği yaklaşık sayı)</em>" if require_claim_type(row["claim_type"]).semantics == PLATFORM_REPORTED_COUNT else ""
-        items.append(f"<li><strong>{html.escape(row['claim_type'])}</strong>: {html.escape(str(value))}{note}<br>Kaynak: {html.escape(row['source_id'])} — <a href=\"{html.escape(row['url'] or '')}\">{html.escape(row['url'] or 'URL yok')}</a> — {html.escape(row['retrieved_at'])}<br>Alıntı/konum: {html.escape(row['quote'] or row['locator'] or '')}</li>")
+        items.append(f"<li><strong>{html.escape(row['claim_type'])}</strong>: {html.escape(rendered_value)}{note}<br>Kaynak: {html.escape(row['source_id'])} — <a href=\"{html.escape(row['url'] or '')}\">{html.escape(row['url'] or 'URL yok')}</a> — {html.escape(row['retrieved_at'])}<br>Alıntı/konum: {html.escape(row['quote'] or row['locator'] or '')}</li>")
     body = f"<!doctype html><html lang='tr'><meta charset='utf-8'><title>{html.escape(opportunity['title'])}</title><body><h1>{html.escape(opportunity['title'])}</h1><p>Bağsız iddia sayısı: {unbound}</p><ul>{''.join(items)}</ul></body></html>"
     path = Path(out_path)
     path.write_text(body, encoding="utf-8")

@@ -18,3 +18,4 @@ def test_t18_report_binds_claim_to_source(connection, tmp_path):
     assert source.source_id in text and "https://example.test/search" in text
     assert "1,234 results for nursery wall art" in text
     assert "platformun bildirdiği yaklaşık sayı" in text
+    assert "1234.0 count" in text
