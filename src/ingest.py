@@ -77,7 +77,7 @@ def ingest(
     ingested_at = isoformat_utc(now)
     meta = {
         "source_id": source_id, "source_family": source_family, "kind": kind,
-        "url": url, "locale": locale, "retrieved_at": isoformat_utc(retrieved),
+        "url": url, "locale": locale, "retrieved_at": retrieved.replace(microsecond=0).isoformat(),
         "ingested_at": ingested_at, "raw_hash": raw_hash, "content_type": content_type,
         "byte_size": len(data), "collector": collector,
     }

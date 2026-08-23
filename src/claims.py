@@ -70,7 +70,11 @@ def add_claim(
             raise ValueError(f"CB-2: unit {spec.unit!r} olmalıdır")
     elif value_text is None:
         raise ValueError("Metinsel iddia için value_text zorunludur")
-    if _time(observed_at) > _time(source["retrieved_at"]):
+    if len(observed_at) == 10:
+        observed_is_future = date.fromisoformat(observed_at) > _time(source["retrieved_at"]).date()
+    else:
+        observed_is_future = _time(observed_at) > _time(source["retrieved_at"])
+    if observed_is_future:
         raise ValueError("CB-3: observed_at source.retrieved_at değerini aşamaz")
     damaged = verify_snapshots(connection, evidence_dir)
     if source_id in damaged:

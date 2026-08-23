@@ -60,6 +60,18 @@ def test_t09_observed_at_cannot_follow_retrieval(connection, text_source):
         add_claim(connection, **args, quote="1,234 results for nursery wall art")
 
 
+def test_date_only_observation_uses_source_local_calendar_date(connection, tmp_path):
+    from src.ingest import ingest
+    evidence=tmp_path/"evidence"
+    source=ingest(connection,data=b"screenshot",source_family="ETSY",kind="MANUAL_SCREENSHOT",
+                  url="https://example.test",locale="TR",retrieved_at="2026-08-24T02:07:00+03:00",
+                  evidence_dir=evidence,file_name="shot.png")
+    result=add_claim(connection,source_id=source.source_id,claim_type="ETSY_LISTING_COUNT",
+                     subject="nursery",value_num=1000,unit="count",observed_at="2026-08-24",
+                     locator="arama üst satırı",evidence_dir=evidence)
+    assert result.claim_id == "clm_000001"
+
+
 def test_t10_duplicate_claim_is_rejected(connection, text_source):
     source_id, evidence = text_source
     args = base(source_id, evidence)
