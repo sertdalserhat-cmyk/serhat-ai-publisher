@@ -7,8 +7,7 @@ import threading
 import webbrowser
 from urllib.parse import parse_qs
 
-from .blueprint import build_blueprint_preview
-from .dashboard import render_blueprint, render_dashboard, render_review
+from .dashboard import render_dashboard, render_review
 from .db import connect
 from .opportunity import set_status
 from .review import load_review
@@ -37,14 +36,6 @@ def make_handler(db_path: Path, evidence_dir: Path):
                 finally:
                     conn.close()
                 return
-            if self.path == "/blueprint":
-                conn = connect(db_path)
-                try:
-                    preview = build_blueprint_preview(load_review(conn))
-                    self._send(render_blueprint(preview))
-                finally:
-                    conn.close()
-                return
             else:
                 self._send("Bulunamadı", 404)
 
@@ -62,12 +53,9 @@ def make_handler(db_path: Path, evidence_dir: Path):
                 form = parse_qs(self.rfile.read(length).decode("utf-8"))
                 status = form.get("status", [""])[0]
                 rationale = form.get("rationale", [""])[0]
-                confirmed = form.get("confirm", [""])[0] == "YES"
                 conn = connect(db_path)
                 try:
                     review = load_review(conn)
-                    if not confirmed:
-                        raise ValueError("Karar için açık onay kutusu zorunludur")
                     set_status(conn, review.id, status, rationale)
                     review = load_review(conn, review.id)
                     self._send(render_review(review, "Kararın değiştirilemez günlüğe kaydedildi."))

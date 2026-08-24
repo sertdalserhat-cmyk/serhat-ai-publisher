@@ -5,5 +5,4 @@ evidence/
 *.db
 __pycache__/
 .pytest_cache/
-.test-runs/
 report_*.html
