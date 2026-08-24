@@ -24,8 +24,7 @@ def initialize(path: Path | str = DB_PATH) -> sqlite3.Connection:
     connection.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
     with connection:
         connection.execute(
-            """INSERT INTO meta(key, value) VALUES('schema_version', '2')
-               ON CONFLICT(key) DO UPDATE SET value='2'"""
+            "INSERT OR IGNORE INTO meta(key, value) VALUES('schema_version', '1')"
         )
         connection.execute(
             "INSERT OR IGNORE INTO meta(key, value) VALUES('created_at', ?)",

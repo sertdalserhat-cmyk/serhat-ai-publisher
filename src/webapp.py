@@ -9,7 +9,7 @@ from urllib.parse import parse_qs
 
 from .blueprint import build_blueprint_preview
 from .dashboard import render_blueprint, render_dashboard, render_review
-from .db import connect, initialize
+from .db import connect
 from .opportunity import set_status
 from .review import load_review
 from .start_flow import evaluate_start
@@ -92,7 +92,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
     args = parser.parse_args(argv)
-    initialize(Path(args.db).resolve()).close()
     address = ("127.0.0.1", args.port)
     server = ThreadingHTTPServer(
         address, make_handler(Path(args.db).resolve(), Path(args.evidence).resolve())

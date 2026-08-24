@@ -37,12 +37,6 @@ fiyat/puan/yorum aralıkları gösterilir; sistem talep veya başarı puanı uyd
 Panel yalnızca `127.0.0.1` üzerinde çalışır; internete açılmaz. Etsy API onayı gelene kadar manual-first
 Evidence Store verilerini kullanır ve bilinmeyen pazar verilerini üretmez.
 
-## Schema v2 — Product Blueprint
-
-Onaylanmış bir fırsat için hedef kitle, müşteri problemi, ürün vaadi, yaş aralığı, sayfa/aktivite
-sayısı, farklılaştırıcı, hedef fiyat ve içerik yapısı sürümlü olarak saklanabilir. `READY_FOR_REVIEW`
-durumundaki fırsatlar Blueprint kaydedemez; önce insan tarafından gerekçeli `APPROVED` kararı gerekir.
-
 ## G-1 ve gerçek veri
 
 Etsy API key onayı S-2'yi engellemez. Onay gelene kadar tüm kaynaklar manual-first girilir.
