@@ -5,7 +5,9 @@ import pytest
 from src.cost import LLMDisabledError, record_llm_call
 from src.extraction import (
     ClaimCandidate,
+    DeterministicDryRunExtractor,
     apply_candidate_decision,
+    render_candidate_review,
     run_claim_extraction,
     validate_claim_candidate,
 )
@@ -498,3 +500,37 @@ def test_s3_t16_approved_claim_report_has_zero_unbound_claims(connection, tmp_pa
     assert connection.execute(
         "SELECT COUNT(*) FROM claim WHERE opportunity_id IS NULL"
     ).fetchone()[0] == 0
+
+
+def test_dry_run_renders_human_review_without_network_cost_or_writes(connection, tmp_path):
+    evidence = tmp_path / "evidence"
+    source = ingest(
+        connection,
+        data=b"Observed listing price is 12.99 USD",
+        source_family="AMAZON_KDP",
+        kind="MANUAL_PASTE",
+        url="https://example.test/item",
+        retrieved_at="2026-08-23T14:10:00+00:00",
+        evidence_dir=evidence,
+    )
+    output = (
+        '[{"source_id":"' + source.source_id + '",'
+        '"claim_type":"AMZ_PRICE","subject":"example book",'
+        '"observed_at":"2026-08-23","value_num":12.99,"unit":"USD",'
+        '"quote":"Observed listing price is 12.99 USD"}]'
+    )
+    proposals = run_claim_extraction(
+        connection,
+        source_id=source.source_id,
+        extractor=DeterministicDryRunExtractor(output),
+        llm_enabled=False,
+        evidence_dir=evidence,
+    )
+    review = render_candidate_review(proposals)
+
+    assert "İNSAN ONAYI GEREKİR" in review
+    assert "Karar: BEKLİYOR" in review
+    assert source.source_id in review
+    assert "12.99 USD" in review
+    assert connection.execute("SELECT COUNT(*) FROM claim").fetchone()[0] == 0
+    assert connection.execute("SELECT COUNT(*) FROM llm_call").fetchone()[0] == 0

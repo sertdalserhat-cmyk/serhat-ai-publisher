@@ -32,6 +32,39 @@ class ClaimExtractor(Protocol):
     def extract(self, request: object) -> object: ...
 
 
+@dataclass(frozen=True)
+class DeterministicDryRunExtractor:
+    """Network-free extractor used to exercise the human review flow."""
+
+    output: str
+
+    def extract(self, request: object) -> str:
+        return self.output
+
+
+def render_candidate_review(candidates: list[ClaimCandidate]) -> str:
+    """Render proposals for human review without changing persistent state."""
+    lines = ["S-3 CLAIM ADAYLARI — İNSAN ONAYI GEREKİR"]
+    if not candidates:
+        return "\n".join([*lines, "Aday bulunamadı."])
+    for index, candidate in enumerate(candidates, 1):
+        value = candidate.value_num if candidate.value_num is not None else candidate.value_text
+        rendered_value = f"{value} {candidate.unit}" if candidate.unit else str(value)
+        evidence = candidate.quote or candidate.locator or "KANIT KONUMU YOK"
+        lines.extend(
+            [
+                "",
+                f"[{index}] {candidate.claim_type}",
+                f"Kaynak: {candidate.source_id}",
+                f"Konu: {candidate.subject}",
+                f"Değer: {rendered_value}",
+                f"Kanıt: {evidence}",
+                "Karar: BEKLİYOR — ONAY veya RED zorunlu",
+            ]
+        )
+    return "\n".join(lines)
+
+
 def apply_candidate_decision(
     connection,
     candidate: ClaimCandidate,
@@ -140,7 +173,7 @@ def run_claim_extraction(
     evidence_dir: Path = EVIDENCE_DIR,
 ):
     """Return validated proposals; never persist model output as claims."""
-    if not llm_enabled:
+    if not llm_enabled and not isinstance(extractor, DeterministicDryRunExtractor):
         raise LLMDisabledError("S-3 LLM bütçesi kapalıdır")
     proposals = extractor.extract({"source_id": source_id})
     if isinstance(proposals, str):

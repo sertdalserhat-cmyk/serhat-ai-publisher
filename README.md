@@ -24,6 +24,13 @@ Secret taraması yalnızca 11 sabit literal kullanır. **Bu bir savunma katmanı
 
 S-2 deterministiktir ve LLM çağrısı yapmaz. S-3 ancak tüm testler, bağsız iddia sayısı sıfır ve kullanıcı tarafından gerçek sayfalardan girilmiş 30 gerçek claim tamamlandıktan sonra başlar.
 
+## S-3 güvenli çıkarım akışı
+
+S-3 çıkarıcıları yalnız claim adayı üretir; doğrudan `claim` tablosuna yazamaz. Her aday
+mevcut S-2 kaynak, snapshot, tarih, kapalı sözlük ve citation kurallarıyla doğrulanır.
+Kalıcı kayıt için açık insan `ONAY` kararı gerekir. Ağsız `DeterministicDryRunExtractor`,
+adayları maliyet veya LLM çağrısı oluşturmadan insan inceleme metnine dönüştürür.
+
 ## G-1 ve gerçek veri
 
 Etsy API key onayı S-2'yi engellemez. Onay gelene kadar tüm kaynaklar manual-first girilir.
