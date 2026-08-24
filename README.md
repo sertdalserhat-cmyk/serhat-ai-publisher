@@ -43,13 +43,6 @@ Onaylanmış bir fırsat için hedef kitle, müşteri problemi, ürün vaadi, ya
 sayısı, farklılaştırıcı, hedef fiyat ve içerik yapısı sürümlü olarak saklanabilir. `READY_FOR_REVIEW`
 durumundaki fırsatlar Blueprint kaydedemez; önce insan tarafından gerekçeli `APPROVED` kararı gerekir.
 
-## Schema v3 — AI bot çekirdeği
-
-Bot çalışmaları `DRY_RUN`, `MANUAL` veya `LIVE` modunda sürümlü görev kuyruğu kullanır. İlk hat:
-`VALIDATE_EVIDENCE → HUMAN_OPPORTUNITY_DECISION → PRODUCT_BLUEPRINT → AI_RESEARCH_EXPANSION`.
-Her görev checkpoint saklar; insan kararı veya bütçe kapısı bekleniyorsa çalışma güvenli biçimde durur.
-Aynı anda yalnız bir açık bot çalışması olabilir. `budget.json` kapalıyken LLM görevi çağrı yapmadan `BLOCKED` olur.
-
 ## G-1 ve gerçek veri
 
 Etsy API key onayı S-2'yi engellemez. Onay gelene kadar tüm kaynaklar manual-first girilir.

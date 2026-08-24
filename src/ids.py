@@ -9,8 +9,6 @@ PREFIX_WIDTHS = {
     "opportunity": ("opp", 4),
     "decision_log": ("dec", 6),
     "llm_call": ("llm", 6),
-    "bot_run": ("run", 6),
-    "bot_task": ("tsk", 6),
 }
 
 
