@@ -15,7 +15,7 @@ def test_t01_init_is_idempotent_and_preserves_data(db_path):
     second = initialize(db_path)
     assert second.execute(
         "SELECT value FROM meta WHERE key='schema_version'"
-    ).fetchone()[0] == "2"
+    ).fetchone()[0] == "3"
     assert second.execute(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='product_blueprint'"
     ).fetchone()[0] == "product_blueprint"

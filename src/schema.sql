@@ -121,3 +121,34 @@ CREATE TABLE IF NOT EXISTS product_blueprint (
   CHECK (target_price > 0),
   CHECK (ip_review_status IN ('PENDING','PASS','HOLD','REJECT'))
 );
+
+CREATE TABLE IF NOT EXISTS bot_run (
+  id             TEXT PRIMARY KEY,
+  opportunity_id TEXT NOT NULL REFERENCES opportunity(id),
+  mode           TEXT NOT NULL,
+  status         TEXT NOT NULL,
+  current_step   TEXT,
+  last_error     TEXT,
+  created_at     TEXT NOT NULL,
+  updated_at     TEXT NOT NULL,
+  CHECK (mode IN ('DRY_RUN','MANUAL','LIVE')),
+  CHECK (status IN ('RUNNING','WAITING_HUMAN','BLOCKED','FAILED','COMPLETED','CANCELLED'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_single_open_bot_run
+  ON bot_run(1) WHERE status IN ('RUNNING','WAITING_HUMAN','BLOCKED');
+
+CREATE TABLE IF NOT EXISTS bot_task (
+  id          TEXT PRIMARY KEY,
+  run_id      TEXT NOT NULL REFERENCES bot_run(id),
+  sequence_no INTEGER NOT NULL,
+  task_key    TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'PENDING',
+  attempt     INTEGER NOT NULL DEFAULT 0,
+  max_attempt INTEGER NOT NULL DEFAULT 3,
+  checkpoint TEXT,
+  last_error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE(run_id, sequence_no),
+  CHECK (status IN ('PENDING','RUNNING','WAITING_HUMAN','BLOCKED','FAILED','COMPLETED','SKIPPED'))
+);
