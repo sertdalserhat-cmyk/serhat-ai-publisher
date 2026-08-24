@@ -98,3 +98,31 @@ CREATE TABLE IF NOT EXISTS llm_call (
   input_hash   TEXT NOT NULL,
   created_at   TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS product_blueprint (
+  id                 TEXT PRIMARY KEY,
+  opportunity_id     TEXT NOT NULL UNIQUE REFERENCES opportunity(id),
+  working_title      TEXT NOT NULL,
+  target_reader      TEXT NOT NULL,
+  reader_problem     TEXT NOT NULL,
+  product_promise    TEXT NOT NULL,
+  format             TEXT NOT NULL,
+  language           TEXT NOT NULL,
+  market             TEXT NOT NULL,
+  differentiators    TEXT NOT NULL,
+  content_outline    TEXT NOT NULL,
+  risks              TEXT NOT NULL,
+  unknowns           TEXT NOT NULL,
+  status             TEXT NOT NULL,
+  approved_by        TEXT NOT NULL,
+  created_at         TEXT NOT NULL,
+  CHECK (status = 'APPROVED')
+);
+
+CREATE TABLE IF NOT EXISTS blueprint_evidence (
+  blueprint_id       TEXT NOT NULL REFERENCES product_blueprint(id),
+  statement_no       INTEGER NOT NULL,
+  statement_text     TEXT NOT NULL,
+  claim_id           TEXT NOT NULL REFERENCES claim(id),
+  PRIMARY KEY (blueprint_id, statement_no, claim_id)
+);

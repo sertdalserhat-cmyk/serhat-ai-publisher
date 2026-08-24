@@ -9,6 +9,7 @@ PREFIX_WIDTHS = {
     "opportunity": ("opp", 4),
     "decision_log": ("dec", 6),
     "llm_call": ("llm", 6),
+    "product_blueprint": ("blp", 6),
 }
 
 
