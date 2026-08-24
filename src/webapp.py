@@ -8,7 +8,6 @@ import webbrowser
 from urllib.parse import parse_qs
 
 from .blueprint import build_blueprint_preview
-from .blueprint_store import load_blueprint, save_blueprint
 from .dashboard import render_blueprint, render_dashboard, render_review
 from .db import connect, initialize
 from .opportunity import set_status
@@ -42,7 +41,7 @@ def make_handler(db_path: Path, evidence_dir: Path):
                 conn = connect(db_path)
                 try:
                     preview = build_blueprint_preview(load_review(conn))
-                    self._send(render_blueprint(preview, load_blueprint(conn, preview.opportunity_id)))
+                    self._send(render_blueprint(preview))
                 finally:
                     conn.close()
                 return
@@ -74,24 +73,6 @@ def make_handler(db_path: Path, evidence_dir: Path):
                     self._send(render_review(review, "Kararın değiştirilemez günlüğe kaydedildi."))
                 except ValueError as exc:
                     self._send(render_review(load_review(conn), str(exc)), 400)
-                finally:
-                    conn.close()
-                return
-            if self.path == "/blueprint/save":
-                length = int(self.headers.get("Content-Length", "0"))
-                form = {k: v[0] for k, v in parse_qs(self.rfile.read(length).decode("utf-8")).items()}
-                conn = connect(db_path)
-                try:
-                    review = load_review(conn)
-                    preview = build_blueprint_preview(review)
-                    if form.pop("confirm", "") != "YES":
-                        raise ValueError("Blueprint için açık insan onayı zorunludur")
-                    version = save_blueprint(conn, review.id, form)
-                    self._send(render_blueprint(preview, load_blueprint(conn, review.id), f"Blueprint v{version} kaydedildi."))
-                except ValueError as exc:
-                    review = load_review(conn)
-                    preview = build_blueprint_preview(review)
-                    self._send(render_blueprint(preview, load_blueprint(conn, review.id), str(exc)), 400)
                 finally:
                     conn.close()
                 return

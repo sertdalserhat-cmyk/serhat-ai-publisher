@@ -12,12 +12,6 @@ REQUIRED_TEXT = (
 )
 
 
-def load_blueprint(conn: sqlite3.Connection, opportunity_id: str):
-    return conn.execute(
-        "SELECT * FROM product_blueprint WHERE opportunity_id=?", (opportunity_id,)
-    ).fetchone()
-
-
 def save_blueprint(conn: sqlite3.Connection, opportunity_id: str, data: dict[str, object]) -> int:
     opportunity = conn.execute(
         "SELECT status FROM opportunity WHERE id=?", (opportunity_id,)
