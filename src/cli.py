@@ -30,7 +30,12 @@ def backup(db_path):
 
 def main(argv=None):
     a=build_parser().parse_args(argv); db_path=Path(a.db); evidence=Path(a.evidence)
-    if a.command=="init": initialize(db_path).close(); print("Veritabanı hazır (schema_version=1)."); return 0
+    if a.command=="init":
+        initialized = initialize(db_path)
+        version = initialized.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()[0]
+        initialized.close()
+        print(f"Veritabanı hazır (schema_version={version}).")
+        return 0
     conn=connect(db_path)
     try:
         if a.command=="ingest": r=ingest(conn,data=Path(a.file).read_bytes(),source_family=a.family,kind=a.kind,url=a.url,locale=a.locale,retrieved_at=a.retrieved_at,file_name=a.file,evidence_dir=evidence); print(r.message); return 0

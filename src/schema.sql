@@ -98,3 +98,26 @@ CREATE TABLE IF NOT EXISTS llm_call (
   input_hash   TEXT NOT NULL,
   created_at   TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS product_blueprint (
+  opportunity_id    TEXT PRIMARY KEY REFERENCES opportunity(id),
+  audience          TEXT NOT NULL,
+  customer_problem  TEXT NOT NULL,
+  product_promise   TEXT NOT NULL,
+  age_min           INTEGER NOT NULL,
+  age_max           INTEGER NOT NULL,
+  page_count        INTEGER NOT NULL,
+  activity_count    INTEGER NOT NULL,
+  differentiator    TEXT NOT NULL,
+  target_price      REAL NOT NULL,
+  currency          TEXT NOT NULL,
+  content_structure TEXT NOT NULL,
+  ip_review_status  TEXT NOT NULL DEFAULT 'PENDING',
+  version           INTEGER NOT NULL DEFAULT 1,
+  created_at        TEXT NOT NULL,
+  updated_at        TEXT NOT NULL,
+  CHECK (age_min >= 0 AND age_max >= age_min),
+  CHECK (page_count > 0 AND activity_count > 0),
+  CHECK (target_price > 0),
+  CHECK (ip_review_status IN ('PENDING','PASS','HOLD','REJECT'))
+);
