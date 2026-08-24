@@ -3,7 +3,6 @@ from __future__ import annotations
 from html import escape
 
 from .start_flow import StartResult
-from .review import OpportunityReview
 
 
 def render_dashboard(result: StartResult | None = None) -> str:
@@ -35,7 +34,6 @@ def render_dashboard(result: StartResult | None = None) -> str:
             <small>{escape(result.opportunity_status or 'HAZIRLANIYOR')}</small>
           </div>
           <p class="next">Sonraki adım: <b>{escape(result.next_action)}</b></p>
-          {'<a class="review-link" href="/review">FIRSATI İNCELE →</a>' if result.ready else ''}
         </section>"""
 
     return f"""<!doctype html>
@@ -49,7 +47,6 @@ main{{width:min(960px,92vw);margin:auto;padding:44px 0 70px}} header{{display:fl
 #start{{width:220px;height:220px;border:0;border-radius:50%;background:var(--ink);color:white;font-size:27px;font-weight:900;letter-spacing:.08em;cursor:pointer;box-shadow:0 22px 50px #14231d42;transition:.2s}} #start:hover{{transform:translateY(-4px);background:var(--green)}} #start:disabled{{opacity:.65;cursor:wait}}
 .result{{margin-top:55px;padding:30px;border:1px solid #d6d5c9;border-radius:24px;background:#ffffffad;backdrop-filter:blur(7px)}} .result.ready{{border-color:#8ebd83}} .result.blocked{{border-color:#d9a49e}} .eyebrow{{font-size:11px;letter-spacing:.18em;font-weight:800;color:var(--green);margin:0 0 8px}} h2{{margin:0 0 10px;font-size:29px;letter-spacing:-.03em}} .result>p{{color:var(--muted)}}
 .metrics{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:25px 0}} .metrics article{{background:var(--card);padding:18px;border-radius:15px;border:1px solid #e6e2d8}} .metrics strong{{font-size:30px;display:block}} .metrics span{{font-size:12px;color:var(--muted)}} .opportunity{{display:flex;align-items:center;gap:15px;padding:18px;background:var(--ink);color:white;border-radius:15px}} .opportunity span{{font-size:10px;color:var(--lime)}} .opportunity b{{flex:1}} .opportunity small{{color:#dbe7df}} .next{{margin-bottom:0}}
-.review-link{{display:inline-block;margin-top:16px;padding:13px 18px;border-radius:99px;background:var(--green);color:white;text-decoration:none;font-weight:800;font-size:12px;letter-spacing:.08em}}
 footer{{margin-top:45px;color:var(--muted);font-size:12px}} @media(max-width:700px){{.hero{{grid-template-columns:1fr;text-align:center}} .lead{{margin:auto}} #start{{width:175px;height:175px}} .metrics{{grid-template-columns:repeat(2,1fr)}} header{{margin-bottom:45px}}}}
 </style></head><body><main>
 <header><div class="brand">SERHAT AI PUBLISHER</div><div class="mode">MANUAL-FIRST · API'SİZ</div></header>
@@ -60,37 +57,3 @@ footer{{margin-top:45px;color:var(--muted);font-size:12px}} @media(max-width:700
 const button=document.getElementById('start');
 button.addEventListener('click',async()=>{{button.disabled=true;button.textContent='KONTROL…';try{{const response=await fetch('/start',{{method:'POST'}});document.open();document.write(await response.text());document.close();}}catch(e){{button.disabled=false;button.textContent='TEKRAR DENE';alert('Yerel uygulamaya ulaşılamadı.');}}}});
 </script></body></html>"""
-
-
-def render_review(review: OpportunityReview, message: str | None = None) -> str:
-    types = "".join(
-        f"<li><span>{escape(name)}</span><b>{count}</b></li>"
-        for name, count in review.claim_types
-    )
-    confidence = " · ".join(f"{escape(name)}: {count}" for name, count in review.confidence_counts)
-    price = "UNKNOWN"
-    if review.price_min is not None:
-        price = f"{review.price_min:.2f}–{review.price_max:.2f} {escape(review.currency or '')}"
-    rating = "UNKNOWN"
-    if review.rating_min is not None:
-        rating = f"{review.rating_min:g}–{review.rating_max:g} yıldız"
-    notice = f'<div class="notice">{escape(message)}</div>' if message else ""
-    locked = review.status in {"APPROVED", "REJECTED", "PARKED"}
-    controls = ""
-    if not locked:
-        controls = """
-        <form method="post" action="/decision">
-          <label>Karar gerekçesi<textarea name="rationale" required minlength="5" placeholder="Bu kararı neden veriyoruz?"></textarea></label>
-          <div class="actions">
-            <button name="status" value="APPROVED" class="approve">ONAYLA</button>
-            <button name="status" value="PARKED">BEKLET</button>
-            <button name="status" value="REJECTED" class="reject">REDDET</button>
-          </div>
-        </form>"""
-    else:
-        controls = f'<div class="locked">Karar kaydedildi: <b>{escape(review.status)}</b></div>'
-    return f"""<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fırsat İncelemesi</title>
-<style>body{{margin:0;background:#f6f1e7;color:#14231d;font-family:Segoe UI,Arial,sans-serif}}main{{width:min(900px,92vw);margin:45px auto}}a{{color:#186b4b}}.eyebrow{{font-size:11px;letter-spacing:.17em;color:#186b4b;font-weight:800}}h1{{font-size:48px;letter-spacing:-.05em;margin:10px 0}}.sub{{color:#66756e}}.cards{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}}.card,.panel{{background:#fffdf8;border:1px solid #ddd8cc;border-radius:18px;padding:20px}}.card b{{font-size:25px;display:block}}.card span{{font-size:12px;color:#66756e}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}ul{{list-style:none;padding:0;margin:0}}li{{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #eee9df;font-size:13px}}textarea{{display:block;width:100%;min-height:90px;margin-top:8px;padding:12px;border:1px solid #c9c6bb;border-radius:12px;font:inherit}}form{{margin-top:25px}}.actions{{display:flex;gap:10px;margin-top:12px}}button{{padding:13px 20px;border-radius:99px;border:1px solid #b8b8ad;background:white;font-weight:800;cursor:pointer}}.approve{{background:#186b4b;color:white;border-color:#186b4b}}.reject{{color:#a43d32}}.notice,.locked{{margin:20px 0;padding:16px;border-radius:12px;background:#e4f0cf}}@media(max-width:650px){{.cards{{grid-template-columns:repeat(2,1fr)}}.grid{{grid-template-columns:1fr}}h1{{font-size:36px}}}}</style></head>
-<body><main><a href="/">← Ana ekran</a>{notice}<p class="eyebrow">İNSAN KARAR KAPISI</p><h1>{escape(review.title)}</h1><p class="sub">{escape(review.channel)} · {escape(review.product_type)} · {escape(review.niche)} · {escape(review.status)}</p>
-<section class="cards"><div class="card"><b>{review.claim_count}</b><span>Aktif claim</span></div><div class="card"><b>{review.source_count}</b><span>Bağımsız snapshot</span></div><div class="card"><b>{price}</b><span>Gözlenen fiyat aralığı</span></div><div class="card"><b>{rating}</b><span>Gözlenen puan aralığı</span></div></section>
-<section class="grid"><div class="panel"><h2>Kanıt dağılımı</h2><ul>{types}</ul></div><div class="panel"><h2>Karar notu</h2><p><b>Güven:</b> {confidence or 'UNKNOWN'}</p><p><b>En yüksek görülen yorum:</b> {review.review_count_max if review.review_count_max is not None else 'UNKNOWN'}</p><p>Bu ekran yalnız gözlenen veriyi gösterir. Talep, kârlılık veya başarı puanı uydurmaz.</p></div></section>{controls}</main></body></html>"""

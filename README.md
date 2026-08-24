@@ -30,10 +30,6 @@ Windows'ta `BASLAT.cmd` dosyasına çift tıklayın. Yerel Serhat AI Publisher p
 Büyük **BAŞLAT** düğmesi mevcut snapshot hash'lerini, claim sayısını, citation binding durumunu,
 LLM çağrı sayısını ve öne çıkan fırsatın inceleme durumunu doğrular.
 
-Kontroller geçtiğinde **FIRSATI İNCELE** ekranı açılır. Burada yalnız gözlenen kanıt dağılımı,
-fiyat/puan/yorum aralıkları gösterilir; sistem talep veya başarı puanı uydurmaz. `ONAYLA`,
-`BEKLET` ve `REDDET` kararları gerekçe ister ve append-only karar günlüğüne yazılır.
-
 Panel yalnızca `127.0.0.1` üzerinde çalışır; internete açılmaz. Etsy API onayı gelene kadar manual-first
 Evidence Store verilerini kullanır ve bilinmeyen pazar verilerini üretmez.
 

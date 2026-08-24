@@ -5,12 +5,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import threading
 import webbrowser
-from urllib.parse import parse_qs
 
-from .dashboard import render_dashboard, render_review
+from .dashboard import render_dashboard
 from .db import connect
-from .opportunity import set_status
-from .review import load_review
 from .start_flow import evaluate_start
 
 
@@ -26,46 +23,21 @@ def make_handler(db_path: Path, evidence_dir: Path):
             self.wfile.write(encoded)
 
         def do_GET(self) -> None:
-            if self.path == "/":
-                self._send(render_dashboard())
-                return
-            if self.path == "/review":
-                conn = connect(db_path)
-                try:
-                    self._send(render_review(load_review(conn)))
-                finally:
-                    conn.close()
-                return
-            else:
+            if self.path != "/":
                 self._send("Bulunamadı", 404)
+                return
+            self._send(render_dashboard())
 
         def do_POST(self) -> None:
-            if self.path == "/start":
-                conn = connect(db_path)
-                try:
-                    result = evaluate_start(conn, evidence_dir)
-                finally:
-                    conn.close()
-                self._send(render_dashboard(result))
-                return
-            if self.path == "/decision":
-                length = int(self.headers.get("Content-Length", "0"))
-                form = parse_qs(self.rfile.read(length).decode("utf-8"))
-                status = form.get("status", [""])[0]
-                rationale = form.get("rationale", [""])[0]
-                conn = connect(db_path)
-                try:
-                    review = load_review(conn)
-                    set_status(conn, review.id, status, rationale)
-                    review = load_review(conn, review.id)
-                    self._send(render_review(review, "Kararın değiştirilemez günlüğe kaydedildi."))
-                except ValueError as exc:
-                    self._send(render_review(load_review(conn), str(exc)), 400)
-                finally:
-                    conn.close()
-                return
-            else:
+            if self.path != "/start":
                 self._send("Bulunamadı", 404)
+                return
+            conn = connect(db_path)
+            try:
+                result = evaluate_start(conn, evidence_dir)
+            finally:
+                conn.close()
+            self._send(render_dashboard(result))
 
         def log_message(self, _format: str, *_args: object) -> None:
             return
